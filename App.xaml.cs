@@ -233,25 +233,23 @@ namespace AimAssistPro
                 LicenseManager?.SetOnlineLicense(username, plan, expiresAt, activatedKey);
 
                 // ── Auto-update obrigatorio: roda ANTES do MainWindow ────────
+                // NOTA: OnStartup e async void — apos o await estamos na UI thread.
+                // NAO use Dispatcher.Invoke aqui (causaria deadlock/crash).
                 Log("9. UpdateService");
                 var updateInfo = await UpdateService.CheckForUpdatesAsync();
 
                 if (updateInfo != null)
                 {
-                    bool shouldExit = false;
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        var dlg = new Views.UpdateDialog(
-                            UpdateService.CurrentVersion,
-                            updateInfo.LatestVersion,
-                            updateInfo.Changelog,
-                            updateInfo.ShouldForce,
-                            updateInfo.DownloadUrl);
-                        dlg.ShowDialog();
-                        shouldExit = dlg.ShouldExitApp;
-                    });
+                    // Ja estamos na UI thread — chama ShowDialog diretamente
+                    var dlg = new Views.UpdateDialog(
+                        UpdateService.CurrentVersion,
+                        updateInfo.LatestVersion,
+                        updateInfo.Changelog,
+                        updateInfo.ShouldForce,
+                        updateInfo.DownloadUrl);
+                    dlg.ShowDialog();
 
-                    if (shouldExit)
+                    if (dlg.ShouldExitApp)
                     {
                         Log("Update: ShouldExitApp=true, encerrando.");
                         Shutdown();

@@ -46,7 +46,7 @@
                             <TextBlock Text="PRECISION AIM" FontSize="15" FontWeight="Black"
                                        Foreground="White"/>
                             <TextBlock Text="ASSIST" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentSecondary}" Margin="0,-2,0,0"/>
-                            <TextBlock Text="v1.2.2 Beta" FontSize="9" Foreground="#555555" Margin="0,1,0,0"/>
+                            <TextBlock Text="v1.2.4 Beta" FontSize="9" Foreground="#555555" Margin="0,1,0,0"/>
                         </StackPanel>
                     </StackPanel>
 
