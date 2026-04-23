@@ -43,21 +43,32 @@ namespace AimAssistPro.Views
 
         private void BtnSkip_Click(object sender, RoutedEventArgs e)
         {
-            // Se obrigatória: não chega aqui (botão desabilitado)
-            // Se opcional: fecha o dialog sem aceitar
             UserAccepted = false;
             Close();
         }
 
-        // Fechar pela barra de título (X) também fecha o app se for obrigatória
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            if (_mandatory)
+            {
+                // Obrigatória: X fecha o app (mesmo comportamento que OnClosing)
+                UserAccepted = false;
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                // Opcional: X apenas dispensa o diálogo
+                UserAccepted = false;
+                Close();
+            }
+        }
+
+        // Fechar pela barra de título (X do Windows) também trata obrigatoriedade
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
-            if (_mandatory && !UserAccepted)
-            {
-                // Encerra o app completamente
-                Application.Current.Shutdown();
-            }
+            // Não chamamos Shutdown() aqui — quem decide é o UpdateResult em App.OnStartup
+            // UserAccepted já é false por padrão, o caller vai verificar
         }
 
         // Permite arrastar

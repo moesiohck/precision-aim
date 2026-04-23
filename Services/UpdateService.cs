@@ -14,7 +14,7 @@ namespace AimAssistPro.Services
     /// </summary>
     internal static class UpdateService
     {
-        public const string CurrentVersion = "1.2.1";
+        public const string CurrentVersion = "1.2.2";
 
         private static readonly HttpClient _checkHttp = new(new HttpClientHandler
         {
