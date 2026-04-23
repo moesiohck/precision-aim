@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl x:Class="AimAssistPro.Views.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <!-- Glassmorphism: card flutuante sem fundo sólido -->
+        <Style x:Key="GlassCard" TargetType="Border">
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="#14FFFFFF"/>
+            <Setter Property="BorderBrush" Value="#28FFFFFF"/>
+            <Setter Property="Margin" Value="0,0,0,18"/>
+        </Style>
+
+        <Style x:Key="InlineTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#0DFFFFFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#22FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ScrollBar invisível mas funcional -->
+        <Style x:Key="InvisibleScrollBar" TargetType="ScrollBar">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- Silhueta sutil -->
+        <Image Source="pack://application:,,,/AimAssistPro;component/Resources/controle.png"
+               HorizontalAlignment="Center" VerticalAlignment="Center"
+               Width="820" Height="820" Stretch="Uniform"
+               Margin="0" Opacity="0.055" IsHitTestVisible="False"/>
+
+        <!-- ScrollViewer com barra invisível -->
+        <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                      HorizontalScrollBarVisibility="Disabled"
+                      PanningMode="VerticalOnly"
+                      Margin="0,0,0,45">
+            <Grid Margin="36,28,36,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ═══ COLUNA ESQUERDA ═══ -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="SYSTEM STATUS" FontSize="11" FontWeight="Bold"
+                               Foreground="#666666" FontFamily="Consolas"
+                               Margin="4,0,0,16"/>
+
+                    <!-- Card IA — Glass -->
+                    <Border Style="{StaticResource GlassCard}">
+                        <StackPanel>
+                            <Grid Margin="20,20,20,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10"
+                                        Background="#15FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1"
+                                        Margin="0,0,14,0">
+                                    <Path Data="{StaticResource AIIcon}" Fill="#BBBBBB" Width="16" Height="16"
+                                          Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Adaptive Engine" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                                    <TextBlock Text="AI Recoil Mapping" FontSize="11" Foreground="#AAAAAA"/>
+                                </StackPanel>
+                                <CheckBox Grid.Column="2" x:Name="AIToggle" Style="{StaticResource ToggleSwitch}"
+                                          VerticalAlignment="Center" IsChecked="True"
+                                          Checked="AIToggle_Checked" Unchecked="AIToggle_Unchecked"/>
+                            </Grid>
+
+                            <Border Height="1" Background="#15FFFFFF" Margin="0"/>
+
+                            <StackPanel Margin="20,16,20,20">
+                                <Grid Margin="0,0,0,16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="DATA POINTS" Foreground="#AAAAAA" FontSize="10"
+                                                   FontFamily="Consolas" FontWeight="Bold" Margin="0,0,0,3"/>
+                                        <TextBlock x:Name="AIStatsLabel" Text="0" Foreground="White"
+                                                   FontSize="16" FontWeight="Black" FontFamily="Consolas"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="ACCURACY" Foreground="#AAAAAA" FontSize="10"
+                                                   FontFamily="Consolas" FontWeight="Bold" Margin="0,0,0,3"/>
+                                        <TextBlock x:Name="AccuracyLabel" Text="0%" Foreground="#DDDDDD"
+                                                   FontSize="18" FontWeight="Black" FontFamily="Consolas"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="0" Height="34" Padding="8,0"
+                                            Background="#10FFFFFF" BorderBrush="#20FFFFFF"
+                                            Foreground="#BBBBBB" FontSize="11" FontFamily="Consolas"
+                                            FontWeight="Bold" Cursor="Hand"
+                                            Click="BtnSyncData_Click">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="1" CornerRadius="8"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock Text="SYNC DATA" FontSize="11" FontWeight="Bold"
+                                                   FontFamily="Consolas" Foreground="#BBBBBB"/>
+                                    </Button>
+                                    <Button Grid.Column="2" Height="34" Padding="8,0"
+                                            Background="#20FF3333" BorderBrush="#35FF4444"
+                                            Foreground="#CC6666" FontSize="11" Cursor="Hand"
+                                            Click="BtnResetAI_Click">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="1" CornerRadius="8"
+                                                        Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center"
+                                                                      VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <TextBlock Text="WIPE LOGS" FontSize="11" FontWeight="Bold"
+                                                   FontFamily="Consolas" Foreground="#CC6666"/>
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card Hardware/Perfil — Glass -->
+                    <Border Style="{StaticResource GlassCard}" Margin="0">
+                        <StackPanel>
+                            <Grid Margin="20,20,20,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10"
+                                        Background="#15FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1"
+                                        Margin="0,0,14,0">
+                                    <Path Data="{StaticResource ControllerIcon}" Fill="#AAAAAA" Width="16" Height="16"
+                                          Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Hardware Link" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                                    <TextBlock Text="Protocolos USB configurados" FontSize="11" Foreground="#AAAAAA"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Border Height="1" Background="#15FFFFFF" Margin="0"/>
+
+                            <StackPanel Margin="20,16,20,20">
+                                <TextBlock Text="ACTIVE SCRIPT" Foreground="#AAAAAA" FontSize="10"
+                                           FontFamily="Consolas" FontWeight="Bold" Margin="0,0,0,6"/>
+                                <Border Background="#0DFFFFFF" BorderBrush="#18FFFFFF" BorderThickness="1"
+                                        CornerRadius="8" Padding="12,10" Margin="0,0,0,16">
+                                    <TextBlock Text="precision.json" Foreground="White"
+                                               FontSize="12" FontFamily="Consolas"/>
+                                </Border>
+
+                                <TextBlock Text="POLLING RATE" Foreground="#AAAAAA" FontSize="10"
+                                           FontFamily="Consolas" FontWeight="Bold" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="PollingRateCombo" Height="36"
+                                          Background="#0DFFFFFF" BorderBrush="#18FFFFFF"
+                                          Foreground="White" FontSize="12" FontFamily="Consolas"
+                                          SelectionChanged="PollingRateCombo_SelectionChanged">
+                                    <ComboBoxItem Content="125 Hz  —  Basic"   Tag="125"/>
+                                    <ComboBoxItem Content="250 Hz  —  Normal"  Tag="250"/>
+                                    <ComboBoxItem Content="500 Hz  —  Stable"  Tag="500"/>
+                                    <ComboBoxItem Content="1000 Hz —  High"    Tag="1000"/>
+                                    <ComboBoxItem Content="2000 Hz —  Ultra"   Tag="2000"/>
+                                    <ComboBoxItem Content="4000 Hz —  Pro"     Tag="4000"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- ═══ COLUNA DIREITA ═══ -->
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="TRACKING MATRIX" FontSize="11" FontWeight="Bold"
+                               Foreground="#666666" FontFamily="Consolas"
+                               Margin="4,0,0,16"/>
+
+                    <!-- Card Sensibilidade — Glass -->
+                    <Border Style="{StaticResource GlassCard}">
+                        <StackPanel>
+                            <Grid Margin="22,22,22,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10"
+                                        Background="#15FFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1"
+                                        Margin="0,0,14,0">
+                                    <Path Data="{StaticResource SettingsIcon}" Fill="#CCCCCC" Width="18" Height="18"
+                                          Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Core Sensor Tuning" FontSize="17" FontWeight="Black" Foreground="White"/>
+                                    <TextBlock Text="Algoritmo de resposta do mouse bruto" FontSize="12" Foreground="#AAAAAA"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Border Height="1" Background="#15FFFFFF" Margin="0"/>
+
+                            <StackPanel Margin="22,16,22,22">
+                                <!-- Sens X/Y -->
+                                <Grid Margin="0,0,0,14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="14"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="SENSITIVITY  X" Foreground="#AAAAAA" FontSize="10"
+                                                   FontFamily="Consolas" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="SensXInput" Style="{StaticResource InlineTextBox}"
+                                                 Height="48" FontSize="22" TextChanged="SensXInput_TextChanged"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="SENSITIVITY  Y" Foreground="#AAAAAA" FontSize="10"
+                                                   FontFamily="Consolas" FontWeight="Bold" Margin="0,0,0,6"/>
+                                        <TextBox x:Name="SensYInput" Style="{StaticResource InlineTextBox}"
+                                                 Height="48" FontSize="22" TextChanged="SensYInput_TextChanged"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Avançados -->
+                                <Border Background="#0AFFFFFF" BorderBrush="#14FFFFFF" BorderThickness="1"
+                                        CornerRadius="10" Padding="16,14">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="14"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="14"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
+                                                   Text="ADVANCED PARAMS" Foreground="#BBBBBB"
+                                                   FontSize="10" FontFamily="Consolas" FontWeight="Bold"
+                                                   Margin="0,0,0,10"/>
+
+                                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,4,0,0">
+                                            <TextBlock Text="FILTER X" Foreground="#AAAAAA" FontSize="10"
+                                                       FontFamily="Consolas" Margin="0,0,0,4"/>
+                                            <TextBox x:Name="SensFilterXInput" Style="{StaticResource InlineTextBox}"
+                                                     Height="32" FontSize="13" TextChanged="AdvancedSens_TextChanged"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,4,0,0">
+                                            <TextBlock Text="FILTER Y" Foreground="#AAAAAA" FontSize="10"
+                                                       FontFamily="Consolas" Margin="0,0,0,4"/>
+                                            <TextBox x:Name="SensFilterYInput" Style="{StaticResource InlineTextBox}"
+                                                     Height="32" FontSize="13" TextChanged="AdvancedSens_TextChanged"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="0">
+                                            <TextBlock Text="CURVE X" Foreground="#AAAAAA" FontSize="10"
+                                                       FontFamily="Consolas" Margin="0,0,0,4"/>
+                                            <TextBox x:Name="AimCurveXInput" Style="{StaticResource InlineTextBox}"
+                                                     Height="32" FontSize="13" TextChanged="AdvancedSens_TextChanged"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Row="2" Grid.Column="2">
+                                            <TextBlock Text="CURVE Y" Foreground="#AAAAAA" FontSize="10"
+                                                       FontFamily="Consolas" Margin="0,0,0,4"/>
+                                            <TextBox x:Name="AimCurveYInput" Style="{StaticResource InlineTextBox}"
+                                                     Height="32" FontSize="13" TextChanged="AdvancedSens_TextChanged"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card Recoil — Glass Compacto -->
+                    <Border Style="{StaticResource GlassCard}" Margin="0">
+                        <Grid Margin="20,18,20,18">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10"
+                                    Background="#20FF4444" BorderBrush="#30FF4444" BorderThickness="1"
+                                    Margin="0,0,14,0">
+                                <Path Data="{StaticResource TargetIcon}" Fill="#CC6666" Width="16" Height="16"
+                                      Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Y-Axis Recoil Mask" FontSize="15" FontWeight="Black" Foreground="White"/>
+                                <TextBlock Text="Static force compensation" FontSize="12" Foreground="#AAAAAA"/>
+                            </StackPanel>
+                            <TextBox Grid.Column="2" x:Name="RecoilInput" Style="{StaticResource InlineTextBox}"
+                                     Height="40" FontSize="18" Foreground="White"
+                                     VerticalAlignment="Center" TextChanged="RecoilInput_TextChanged"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- ═══ BARRA INFERIOR com Glass ═══ -->
+        <Border VerticalAlignment="Bottom" Height="44"
+                Background="#CC050507" BorderBrush="#18FFFFFF" BorderThickness="0,1,0,0">
+            <Grid Margin="20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Path Grid.Column="0"
+                      Data="M4,6H20A2,2 0 0,1 22,8V16A2,2 0 0,1 20,18H4A2,2 0 0,1 2,16V8A2,2 0 0,1 4,6M4,8V16H20V8H4M7,9H9V11H7V9M11,9H13V11H11V9M15,9H17V11H15V9M7,13H17V15H7V13Z"
+                      Fill="#555555" Stretch="Uniform" Width="16" Height="16" VerticalAlignment="Center"
+                      Cursor="Hand" MouseLeftButtonDown="HotkeyIcon_Click"/>
+
+                <Border Grid.Column="2" Background="#15FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1"
+                        CornerRadius="4" Padding="7,2" VerticalAlignment="Center">
+                    <TextBlock x:Name="HotkeyLabel" Text="F8" Foreground="#BBBBBB"
+                               FontSize="11" FontWeight="Bold" FontFamily="Consolas"/>
+                </Border>
+
+                <TextBlock Grid.Column="4" Text="Ligar/Desligar Controle"
+                           Foreground="#555555" FontSize="11" VerticalAlignment="Center"/>
+
+                <Path Grid.Column="6"
+                      Data="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"
+                      Fill="#555555" Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center"
+                      Cursor="Hand" MouseLeftButtonDown="BeepToggle_Click"/>
+
+                <Path Grid.Column="8" x:Name="SaveIconPath" Data="{StaticResource SaveIcon}"
+                      Fill="#555555" Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Center"
+                      Cursor="Hand" MouseLeftButtonDown="ConfigIcon_Click"/>
+
+                <StackPanel Grid.Column="10" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="#AA4444" Margin="0,0,6,0">
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="#CC3333" BlurRadius="5" ShadowDepth="0"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+                    <TextBlock x:Name="StatusLabel" Text="DESATIVADO" Foreground="#AA4444"
+                               FontSize="11" FontWeight="Bold" Margin="0,1,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

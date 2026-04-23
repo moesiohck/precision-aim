@@ -1,0 +1,7 @@
+﻿bin/
+obj/
+*.user
+.vs/
+WebView2Data/
+*.bak
+*.new

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Calibração — Medir posições dos botões</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#08071A;color:#fff;font-family:monospace;overflow:hidden;}
+#wrap{position:relative;display:inline-block;}
+#img{display:block;width:700px;height:700px;object-fit:contain;mix-blend-mode:lighten;}
+#overlay{position:absolute;inset:0;cursor:crosshair;}
+.dot{
+  position:absolute;transform:translate(-50%,-50%);
+  width:12px;height:12px;border-radius:50%;
+  background:rgba(255,0,0,0.8);border:2px solid #fff;
+  pointer-events:none;
+}
+.lbl{
+  position:absolute;transform:translate(8px,-50%);
+  background:rgba(0,0,0,0.85);border:1px solid #fff;
+  padding:1px 5px;font-size:10px;white-space:nowrap;
+  pointer-events:none;
+}
+#log{
+  position:fixed;top:0;right:0;width:300px;height:100vh;
+  background:#0a0818;border-left:1px solid #1E1A3E;
+  overflow-y:auto;padding:10px;font-size:11px;color:#A78BFA;
+}
+#log h3{color:#fff;margin-bottom:8px;border-bottom:1px solid #1E1A3E;padding-bottom:4px;}
+.entry{margin:2px 0;color:#6B6B9B;}
+.entry.new{color:#22C55E;}
+#coords{
+  position:fixed;bottom:0;left:0;right:300px;
+  background:#100F22;border-top:1px solid #1E1A3E;
+  padding:8px 12px;font-size:12px;color:#A78BFA;
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <img id="img" src="controller_elite.png">
+  <div id="overlay"></div>
+</div>
+<div id="log">
+  <h3>📍 Coordenadas clicadas</h3>
+  <p style="color:#4B4570;font-size:10px;margin-bottom:8px">
+    Clique sobre cada botão do controle. Os valores em % aparecem aqui.
+  </p>
+  <div id="entries"></div>
+  <br>
+  <textarea id="output" style="width:100%;height:200px;background:#080614;color:#22C55E;
+    border:1px solid #1E1A3E;font-size:10px;padding:4px;resize:none"
+    placeholder="CSS gerado aparecerá aqui..."></textarea>
+  <br><br>
+  <button onclick="clearAll()" style="background:#1E1A3E;color:#fff;border:1px solid #3A3560;
+    padding:4px 10px;cursor:pointer;border-radius:4px">Limpar</button>
+  <button onclick="copyCSS()" style="background:#7C3AED;color:#fff;border:none;
+    padding:4px 10px;cursor:pointer;border-radius:4px;margin-left:4px">Copiar CSS</button>
+</div>
+<div id="coords">Mova o mouse sobre a imagem para ver as coordenadas</div>
+
+<script>
+const overlay = document.getElementById('overlay');
+const entries = document.getElementById('entries');
+const output  = document.getElementById('output');
+const coords  = document.getElementById('coords');
+const img     = document.getElementById('img');
+
+let clicks = [];
+let mode   = 'click'; // just click anywhere
+
+function getPct(e){
+  const r = img.getBoundingClientRect();
+  const x = ((e.clientX - r.left) / r.width * 100).toFixed(1);
+  const y = ((e.clientY - r.top) / r.height * 100).toFixed(1);
+  return {x,y};
+}
+
+overlay.addEventListener('mousemove', e => {
+  const {x,y} = getPct(e);
+  coords.textContent = `X: ${x}%   Y: ${y}%   (Clique para marcar)`;
+});
+
+overlay.addEventListener('click', e => {
+  const {x,y} = getPct(e);
+  const idx = clicks.length + 1;
+
+  // Draw dot
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.style.left = x+'%'; dot.style.top = y+'%';
+  overlay.appendChild(dot);
+
+  // Draw label
+  const lbl = document.createElement('div');
+  lbl.className = 'lbl';
+  lbl.style.left = x+'%'; lbl.style.top = y+'%';
+  lbl.textContent = `#${idx} (${x}%,${y}%)`;
+  overlay.appendChild(lbl);
+
+  clicks.push({idx,x,y});
+
+  // Log entry
+  const div = document.createElement('div');
+  div.className = 'entry new';
+  div.textContent = `#${idx}: left:${x}%, top:${y}%`;
+  entries.appendChild(div);
+  entries.scrollTop = entries.scrollHeight;
+
+  // Update textarea
+  updateOutput();
+});
+
+function updateOutput(){
+  let txt = `/* Coordenadas clicadas (${clicks.length} pontos) */\n`;
+  clicks.forEach(c => {
+    txt += `/* #${c.idx} */ left:${c.x}%, top:${c.y}%\n`;
+  });
+  output.value = txt;
+}
+
+function clearAll(){
+  clicks = [];
+  overlay.querySelectorAll('.dot,.lbl').forEach(e=>e.remove());
+  entries.innerHTML = '';
+  output.value = '';
+}
+
+function copyCSS(){
+  navigator.clipboard.writeText(output.value);
+  output.style.borderColor='#22C55E';
+  setTimeout(()=>output.style.borderColor='',1000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<Window x:Class="AimAssistPro.Views.ActivateKeyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Precision Aim Assist — Ativar Licença"
+        Width="860" Height="520"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <!-- Container: mesma estética do LoginWindow -->
+    <Border Background="#0A0A0A" CornerRadius="20" ClipToBounds="True">
+        <Grid>
+
+            <!-- IMAGEM DO CONTROLE — direita, grande, igual ao login -->
+            <Image Source="pack://application:,,,/AimAssistPro;component/Resources/controle.png"
+                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                   Width="480" Height="480" Stretch="Uniform"
+                   Margin="0,0,10,0"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   IsHitTestVisible="False" Opacity="1"/>
+
+            <!-- Overlay gradiente escuro → transparente -->
+            <Rectangle IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                        <GradientStop Color="#0A0A0A"   Offset="0"/>
+                        <GradientStop Color="#0A0A0A"   Offset="0.40"/>
+                        <GradientStop Color="#C80A0A0A" Offset="0.54"/>
+                        <GradientStop Color="#700A0A0A" Offset="0.67"/>
+                        <GradientStop Color="#200A0A0A" Offset="0.80"/>
+                        <GradientStop Color="#000A0A0A" Offset="0.92"/>
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Drag area -->
+            <Rectangle Fill="Transparent" VerticalAlignment="Top" Height="52"
+                       MouseLeftButtonDown="TitleBar_MouseDown"/>
+
+            <!-- Botão fechar -->
+            <Button HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Margin="0,14,16,0" Width="30" Height="30"
+                    Cursor="Hand" Click="BtnClose_Click"
+                    Panel.ZIndex="100"
+                    Background="Transparent" BorderThickness="0">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="8"
+                                Background="Transparent" Width="30" Height="30">
+                            <Path x:Name="Icon" Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"
+                                  Fill="#505050" Width="13" Height="13" Stretch="Uniform"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#1F1F1F"/>
+                                <Setter TargetName="Icon" Property="Fill" Value="#EF4444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+            <!-- ═══════════════════ FORMULÁRIO ═══════════════════ -->
+            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Width="360" Margin="52,0,0,0">
+
+                <!-- Logo badge -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,28">
+                    <Image Source="pack://application:,,,/AimAssistPro;component/Resources/logo_p.png"
+                           Width="32" Height="32" Margin="0,0,10,0"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="PRECISION AIM ASSIST" Foreground="#777777"
+                               FontSize="11" FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Título + subtítulo -->
+                <TextBlock Text="ATIVAR LICENÇA" Foreground="White"
+                           FontSize="22" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBlock Text="Digite sua chave de ativação para liberar o app"
+                           Foreground="#909090" FontSize="12" Margin="0,0,0,26"
+                           TextWrapping="Wrap"/>
+
+                <!-- Label -->
+                <TextBlock Text="CHAVE DE ATIVAÇÃO" Foreground="#4B5563" FontSize="11"
+                           FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+                <!-- Input da key com ícone -->
+                <Border Height="48" Background="#141414" BorderBrush="#2E2E2E"
+                        BorderThickness="1" CornerRadius="10" Margin="0,0,0,6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="44"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Ícone de chave -->
+                        <Viewbox Grid.Column="0" Width="16" Height="16"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Canvas.Left="1" Canvas.Top="8" Width="11" Height="11"
+                                         Stroke="#555555" StrokeThickness="2" Fill="Transparent"/>
+                                <Line X1="9.5" Y1="10.5" X2="23" Y2="2"
+                                      Stroke="#555555" StrokeThickness="2"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <Line X1="16" Y1="7" X2="18.5" Y2="9.5"
+                                      Stroke="#555555" StrokeThickness="2"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBox x:Name="KeyInput" Grid.Column="1"
+                                 Background="Transparent" Foreground="White"
+                                 BorderThickness="0" FontSize="15" FontWeight="SemiBold"
+                                 FontFamily="Consolas" Padding="4,0,14,0" Margin="0"
+                                 CaretBrush="#AAAAAA" SelectionBrush="#606060"
+                                 VerticalAlignment="Center"
+                                 MaxLength="20" CharacterCasing="Upper"
+                                 FocusVisualStyle="{x:Null}"
+                                 KeyDown="KeyInput_KeyDown"
+                                 TextChanged="KeyInput_TextChanged">
+                            <TextBox.Template>
+                                <ControlTemplate TargetType="TextBox">
+                                    <ScrollViewer x:Name="PART_ContentHost"
+                                                  VerticalScrollBarVisibility="Hidden"
+                                                  HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalAlignment="Center"/>
+                                </ControlTemplate>
+                            </TextBox.Template>
+                        </TextBox>
+                    </Grid>
+                </Border>
+                <TextBlock Text="Formato: PRCSN-XXXX-XXXX-XXXX" Foreground="#374151"
+                           FontSize="11" HorizontalAlignment="Left" Margin="2,0,0,18"/>
+
+                <!-- Erro -->
+                <Border x:Name="ErrorPanel" Visibility="Collapsed" CornerRadius="8"
+                        Background="#1A0808" BorderBrush="#3A1212" BorderThickness="1"
+                        Padding="12,8" Margin="0,0,0,12">
+                    <TextBlock x:Name="ErrorText" Text="" Foreground="#EF4444"
+                               FontSize="12" TextWrapping="Wrap"/>
+                </Border>
+
+                <!-- Sucesso -->
+                <Border x:Name="SuccessPanel" Visibility="Collapsed" CornerRadius="8"
+                        Background="#081A0C" BorderBrush="#123A1C" BorderThickness="1"
+                        Padding="12,8" Margin="0,0,0,12">
+                    <TextBlock x:Name="SuccessText" Foreground="#22C55E"
+                               FontSize="13" FontWeight="SemiBold"/>
+                </Border>
+
+                <!-- Botão Ativar -->
+                <Button x:Name="BtnActivate" Height="48" Margin="0,0,0,0"
+                        Click="BtnActivate_Click" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bg" CornerRadius="10">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#D0D0D0" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <TextBlock Text="ATIVAR LICENÇA" FontSize="13" FontWeight="Bold"
+                                           Foreground="#0A0A0A"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.88"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.72"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Bg" Property="Opacity" Value="0.35"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Loading -->
+                <TextBlock x:Name="LoadingText" Text="Validando chave..."
+                           Foreground="#606060" FontSize="11"
+                           HorizontalAlignment="Center"
+                           Margin="0,12,0,0" Visibility="Collapsed"/>
+
+                <!-- Copyright -->
+                <TextBlock Text="© 2026 Precision Aim Assist · Todos os direitos reservados"
+                           Foreground="#555555" FontSize="10" Margin="0,20,0,0"/>
+
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</Window>

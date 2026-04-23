@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ── Configurações Gerais ───────────────────────────────────────────── -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>AimAssistPro</AssemblyName>
+    <RootNamespace>AimAssistPro</RootNamespace>
+    <ApplicationIcon>Resources\app copy.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Nullable>enable</Nullable>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Company>Precision Aim Assist</Company>
+    <Product>PRECISION AIM ASSIST</Product>
+    <Copyright>Copyright © 2026 Precision Aim Assist</Copyright>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+
+  </PropertyGroup>
+
+  <!-- ── Proteção: Release sem símbolos de debug ─────────────────────── -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <Deterministic>false</Deterministic>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <!-- WPF + Single File: necessário para pack:// URI funcionar corretamente -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nefarius.ViGEm.Client" Version="1.19.197.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2739.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\app copy.ico" />
+    <Resource Include="Resources\app.ico" />
+    <Resource Include="Resources\controller.png" />
+    <Resource Include="Resources\controller_fb.png" />
+    <Resource Include="Resources\controller_v.png" />
+    <Resource Include="Resources\controller_elite.png" />
+    <Resource Include="Resources\controle.png" />
+    <Resource Include="Resources\logo_p.png" />
+  </ItemGroup>
+
+
+  <!-- HTML e DLLs do controle interativo — copiado para output -->
+  <ItemGroup>
+    <Content Include="interception.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\controller_remap.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\controller_elite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\controle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Instaladores dos drivers embutidos no EXE (extraídos em runtime) -->
+  <ItemGroup>
+    <EmbeddedResource Include="Drivers\ViGEmBus_Setup.exe">
+      <LogicalName>AimAssistPro.Drivers.ViGEmBus_Setup.exe</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Drivers\install-interception.exe">
+      <LogicalName>AimAssistPro.Drivers.install-interception.exe</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

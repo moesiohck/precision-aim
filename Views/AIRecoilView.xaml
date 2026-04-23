@@ -1,0 +1,233 @@
+<UserControl x:Class="AimAssistPro.Views.AIRecoilView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid Margin="32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="IA + Recoil Control" Style="{StaticResource H1}"/>
+            <TextBlock Text="Configurações de aim assist inteligente e compensação de recuo automático" Style="{StaticResource Body}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="320"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Recoil Patterns -->
+            <StackPanel Grid.Column="0">
+
+                <!-- Game Selector -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <Path Data="{StaticResource TargetIcon}" Fill="{StaticResource Danger}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Padrões de Recoil" Style="{StaticResource H3}"/>
+                        </StackPanel>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="JOGO" Style="{StaticResource Label}"/>
+                                <ComboBox x:Name="GameCombo" SelectionChanged="GameCombo_SelectionChanged"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="ARMA" Style="{StaticResource Label}"/>
+                                <ComboBox x:Name="WeaponCombo" SelectionChanged="WeaponCombo_SelectionChanged"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Selected Pattern Info -->
+                        <Border x:Name="PatternInfoPanel"
+                                Background="{StaticResource BgDeep}"
+                                BorderBrush="{StaticResource BorderDefault}"
+                                BorderThickness="1" CornerRadius="8" Padding="16,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/><ColumnDefinition/><ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="ARMA" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="PatternNameText" Text="—" Style="{StaticResource H3}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="FIRE RATE" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="PatternFireRateText" Text="— ms"
+                                               Style="{StaticResource MonoText}" FontSize="14"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="PASSOS" Style="{StaticResource Caption}"/>
+                                    <TextBlock x:Name="PatternStepsText" Text="—"
+                                               Style="{StaticResource MonoText}" FontSize="14"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recoil Strength -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16" VerticalAlignment="Center">
+                            <Path Data="{StaticResource SpeedIcon}" Fill="{StaticResource Cyan}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Intensidade da Compensação" Style="{StaticResource H3}"/>
+                        </StackPanel>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/><ColumnDefinition Width="60"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="RecoilStrengthSlider"
+                                    Minimum="0" Maximum="200" Value="100"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="RecoilStrengthSlider_ValueChanged"/>
+                            <Border Grid.Column="1" Style="{StaticResource BadgeAccent}" Margin="8,0,0,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="RecoilStrengthLabel" Text="100%"
+                                           Foreground="{StaticResource AccentSecondary}" FontSize="12" FontWeight="Bold"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                        <TextBlock Text="100% = compensação exata do padrão. Ajuste conforme sua sensibilidade in-game."
+                                   Style="{StaticResource Caption}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recoil Pattern Preview -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Visualização do Padrão" Style="{StaticResource H3}" Margin="0,0,0,12"/>
+                        <Border Background="{StaticResource BgDeep}" CornerRadius="8" Height="180">
+                            <Canvas x:Name="PatternCanvas" Width="400" Height="160"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Pattern dots drawn in code-behind -->
+                            </Canvas>
+                        </Border>
+                        <TextBlock Text="Cada ponto representa um disparo. O caminho mostra o movimento de compensação aplicado."
+                                   Style="{StaticResource Caption}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Apply Button -->
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="BtnApplyRecoil" Style="{StaticResource PrimaryButton}"
+                            Content="Aplicar Padrão" Height="42" Width="160"
+                            Click="BtnApplyRecoil_Click"/>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="Limpar Padrão" Height="42" Width="140" Margin="12,0,0,0"
+                            Click="BtnClearRecoil_Click"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Right: Aim Assist -->
+            <StackPanel Grid.Column="2">
+
+                <!-- Aim Assist Toggle -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <Path Data="{StaticResource AIIcon}" Fill="{StaticResource AccentSecondary}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Aim Assist IA" Style="{StaticResource H3}"/>
+                        </StackPanel>
+
+                        <CheckBox x:Name="AimAssistToggle"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  Content="Ativar Aim Assist" Margin="0,0,0,16"
+                                  Checked="AimAssistToggle_Changed"
+                                  Unchecked="AimAssistToggle_Changed">
+                            <CheckBox.ContentTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" Foreground="{StaticResource TextPrimary}" FontSize="13"/>
+                                </DataTemplate>
+                            </CheckBox.ContentTemplate>
+                        </CheckBox>
+
+                        <TextBlock Text="FORÇA DO ASSIST" Style="{StaticResource Label}"/>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/><ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="AimStrengthSlider"
+                                    Minimum="0" Maximum="100" Value="30"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="AimStrengthSlider_ValueChanged"/>
+                            <TextBlock Grid.Column="1" x:Name="AimStrengthLabel" Text="30%"
+                                       Foreground="{StaticResource AccentSecondary}" FontWeight="Bold"
+                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Grid>
+
+                        <TextBlock Text="RAIO DE ASSISTÊNCIA (px)" Style="{StaticResource Label}"/>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/><ColumnDefinition Width="50"/>
+                            </Grid.ColumnDefinitions>
+                            <Slider x:Name="AimRadiusSlider"
+                                    Minimum="5" Maximum="50" Value="15"
+                                    VerticalAlignment="Center"
+                                    ValueChanged="AimRadiusSlider_ValueChanged"/>
+                            <TextBlock Grid.Column="1" x:Name="AimRadiusLabel" Text="15px"
+                                       Foreground="{StaticResource AccentSecondary}" FontWeight="Bold"
+                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recoil Enable -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <Path Data="{StaticResource TargetIcon}" Fill="{StaticResource Danger}"
+                                  Width="16" Height="16" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="Recoil Control" Style="{StaticResource H3}"/>
+                        </StackPanel>
+
+                        <CheckBox x:Name="RecoilToggle"
+                                  Style="{StaticResource ToggleSwitch}"
+                                  Content="Ativar Compensação"
+                                  Checked="RecoilToggle_Changed"
+                                  Unchecked="RecoilToggle_Changed"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Status -->
+                <Border x:Name="StatusCard" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Status Atual" Style="{StaticResource H3}" Margin="0,0,0,12"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Ellipse x:Name="RecoilStatusDot" Width="8" Height="8"
+                                     Fill="{StaticResource TextMuted}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="RecoilStatusText" Text="Recoil: Inativo"
+                                       Style="{StaticResource Body}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="AimStatusDot" Width="8" Height="8"
+                                     Fill="{StaticResource TextMuted}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="AimStatusText" Text="Aim Assist: Inativo"
+                                       Style="{StaticResource Body}"/>
+                        </StackPanel>
+
+                        <Separator Margin="0,12"/>
+                        <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap">
+                            <Run FontWeight="SemiBold" Foreground="{StaticResource AccentTertiary}">Nota: </Run>
+                            <Run>A tecla de tiro (RT/MouseLeft) ativa automaticamente a compensação ao ser mantida pressionada.</Run>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+    </ScrollViewer>
+</UserControl>

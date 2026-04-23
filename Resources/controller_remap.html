@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Remapear — Xbox Elite</title>
+<style>
+/* Reset */
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ac:#555;--ac2:#777;
+  --gold:#F59E0B;--bg:#0A0A0A;
+  --sf:#111;--bd:#2a2a2a;
+}
+html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;user-select:none;font-family:'Segoe UI',system-ui,sans-serif;}
+#scene{position:absolute;inset:0 0 0 0;display:flex;align-items:center;justify-content:center;padding:6px;overflow:hidden;}
+#ctrl-box{position:relative;flex-shrink:0;}
+#ctrl-img{display:block;width:100%;height:auto;}
+
+.hs{position:absolute;cursor:pointer;transform:translate(-50%,-50%);background:transparent;border-radius:50%;border:2px solid transparent;transition:border-color 120ms,background 120ms,box-shadow 120ms,transform 110ms;}
+.hs.r{border-radius:10px;}
+.hs:hover,.hs.r:hover{border-color:rgba(180,180,180,0.92);background:rgba(200,200,200,0.14);box-shadow:inset 0 0 4px 1px rgba(180,180,180,0.20),0 0 7px 1px rgba(180,180,180,0.70);transform:translate(-50%,-50%) scale(0.97);}
+.hs.on{background:rgba(150,150,150,0.52)!important;border-color:rgba(220,220,220,0.95)!important;box-shadow:0 0 18px 6px rgba(150,150,150,0.88)!important;transform:translate(-50%,-50%) scale(0.90)!important;}
+.hs.r.on{transform:translate(-50%,-50%) scale(0.90)!important;}
+.hs.mapping,.hs.r.mapping{border-color:rgba(245,158,11,0.92)!important;background:rgba(245,158,11,0.15)!important;animation:pulse .8s ease infinite alternate;}
+@keyframes pulse{from{box-shadow:0 0 10px 2px rgba(245,158,11,.40);}to{box-shadow:0 0 24px 8px rgba(245,158,11,.78);}}
+
+/* Custom tooltip */
+#tt{position:fixed;pointer-events:none;z-index:9999;display:none;}
+#tt-inner{
+  background:rgba(20,20,20,0.97);
+  border:1px solid rgba(255,255,255,0.10);
+  border-radius:10px;
+  padding:7px 13px;
+  font-size:12px;
+  font-weight:600;
+  color:#e8e8e8;
+  white-space:nowrap;
+  box-shadow:0 6px 24px rgba(0,0,0,0.70);
+  backdrop-filter:blur(6px);
+  letter-spacing:0.2px;
+}
+#tt-inner span.key-badge{
+  display:inline-block;
+  background:#282828;
+  border:1px solid #404040;
+  border-radius:5px;
+  padding:1px 6px;
+  font-size:10px;
+  font-family:monospace;
+  color:#aaa;
+  margin-left:6px;
+  vertical-align:middle;
+}
+
+/* Remap modal */
+#mbg{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:200;}
+#mbg.on{display:flex;}
+#mbox{background:#111;border:1px solid #2e2e2e;box-shadow:0 0 40px rgba(0,0,0,0.5);border-radius:14px;padding:22px 28px;width:370px;text-align:left;color:#fff;animation:pop 190ms ease;}
+@keyframes pop{from{opacity:0;transform:scale(.88);}to{opacity:1;transform:scale(1);}}
+
+#mbox h2{font-size:16px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;}
+#mbox h2::before{content:'';display:inline-block;width:8px;height:8px;background:var(--gold);border-radius:50%;margin-right:8px;}
+
+.msub{color:#eee;font-size:14px;font-weight:600;margin-bottom:14px;}
+#mcap{background:#333;border-radius:8px;padding:8px;margin-bottom:12px;font-family:'Segoe UI',sans-serif;font-size:13px;color:#ddd;min-height:140px;max-height:180px;overflow-y:auto;border:1px solid #444;}
+.mkey{padding:10px 12px;border-radius:6px;cursor:pointer;margin-bottom:4px;background:#2a2a2a;transition:all 0.1s;border:1px solid transparent;}
+.mkey:hover{background:#3a3a3a;}
+.mkey.sel{border-color:#F59E0B;background:rgba(245,158,11,0.15);}
+
+.mnote{color:#888;font-size:11px;margin-bottom:20px;text-align:center;}
+.mrow{display:flex;gap:12px;}
+.mb{flex:1;padding:10px 0;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:opacity 110ms;display:flex;align-items:center;justify-content:center;gap:6px;}
+.mb:hover{opacity:.85;}
+.mbs{background:linear-gradient(135deg,#3A3A3A 0%,#1E1E1E 100%);color:#fff;border:1px solid #555;box-shadow:0 2px 8px rgba(0,0,0,0.5);}
+.mbc{background:transparent;color:#ccc;border:1px solid #444;}
+.mbc:hover{background:#2a2a2a;}
+
+#maddbox{display:none;background:#222;border:1px solid #F59E0B;border-radius:8px;padding:12px;text-align:center;font-size:12px;color:#F59E0B;margin-bottom:12px;animation:pulse 0.8s infinite alternate;}
+</style>
+</head>
+<body>
+
+<div id="scene">
+ <div id="ctrl-box">
+  <img id="ctrl-img" src="2.png" alt="Xbox Elite Series 2">
+
+  <div class="hs r" id="h-RB"   style="left:37.60%;top:4.83%;width:5%;height:5.4%" onclick="startMap('RB')" data-tip="RB — Equipamento Letal" data-keys="E"></div>
+  <div class="hs r" id="h-LB"   style="left:94.90%;top:4.67%;width:5%;height:5.4%" onclick="startMap('LB')" data-tip="LB — Equipamento Tático" data-keys="Q"></div>
+  <div class="hs r" id="h-RT"   style="left:31.04%;top:11.43%;width:5%;height:5.4%" onclick="startMap('RT')" data-tip="RT — Atirar" data-keys="Clique Esquerdo"></div>
+  <div class="hs r" id="h-LT"   style="left:95.83%;top:11.59%;width:5%;height:5.4%" onclick="startMap('LT')" data-tip="LT — Mirar (ADS)" data-keys="Clique Direito"></div>
+  <div class="hs r" id="h-Back" style="left:42.60%;top:30.10%;width:5%;height:5.4%" onclick="startMap('Back')" data-tip="Back — Mapa / Placar" data-keys="M"></div>
+  <div class="hs r" id="h-Start"style="left:51.46%;top:29.46%;width:5%;height:5.4%" onclick="startMap('Start')" data-tip="Start — Menu / Configurações" data-keys="Esc"></div>
+  <div class="hs r" id="h-X"    style="left:93.75%;top:40.25%;width:5%;height:5.4%" onclick="startMap('X')" data-tip="X — Recarregar / Interagir" data-keys="R, F"></div>
+  <div class="hs r" id="h-Y"    style="left:88.13%;top:45.40%;width:5%;height:5.4%" onclick="startMap('Y')" data-tip="Y — Trocar Arma / Placa" data-keys="2, Scroll"></div>
+  <div class="hs r" id="h-B"    style="left:93.85%;top:51.84%;width:5%;height:5.4%" onclick="startMap('B')" data-tip="B — Agachar / Deslizar" data-keys="Ctrl, C"></div>
+  <div class="hs r" id="h-A"    style="left:88.23%;top:58.28%;width:5%;height:5.4%" onclick="startMap('A')" data-tip="A — Pular / Subir" data-keys="Espaço"></div>
+  <div class="hs r" id="h-RS"   style="left:83.44%;top:66.00%;width:5%;height:5.4%" onclick="startMap('RS')" data-tip="RS — Coronhada (Melee)" data-keys="V"></div>
+  <div class="hs r" id="h-DPadUp"   style="left:10.31%;top:57.63%;width:5%;height:5.4%" onclick="startMap('DPadUp')" data-tip="D-Pad ↑ — Marcar Inimigo (Ping)" data-keys="Clique do Meio"></div>
+  <div class="hs r" id="h-DPadLeft" style="left:2.92%;top:66.81%;width:5%;height:5.4%"  onclick="startMap('DPadLeft')" data-tip="D-Pad ← — Modo de Disparo" data-keys="B"></div>
+  <div class="hs r" id="h-DPadDown" style="left:10.21%;top:75.99%;width:5%;height:5.4%" onclick="startMap('DPadDown')" data-tip="D-Pad ↓ — Mochila / Inventario" data-keys="Tab"></div>
+  <div class="hs r" id="h-DPadRight"style="left:17.50%;top:66.65%;width:5%;height:5.4%" onclick="startMap('DPadRight')" data-tip="D-Pad → — Séries de Baixas" data-keys="3"></div>
+  <div class="hs r" id="h-LS"   style="left:33.00%;top:43.50%;width:5%;height:5.4%" onclick="startMap('LS')" data-tip="LS — Correr / Prender Respiração" data-keys="Shift"></div>
+  <div class="hs r" id="h-Xbox" style="left:47.00%;top:22.00%;width:5%;height:5.4%" onclick="startMap('Xbox')" data-tip="Botão Xbox"></div>
+ </div>
+</div>
+
+<!-- Custom Tooltip -->
+<div id="tt"><div id="tt-inner"></div></div>
+
+<!-- Remap modal -->
+<div id="mbg">
+  <div id="mbox">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+       <h2 id="mtitle">Remapear: Y</h2>
+       <span style="font-size:20px;cursor:pointer;color:#555;" onclick="cancelMap()">&times;</span>
+    </div>
+    <hr style="border-color:#333;margin:0 0 16px 0;">
+    <p class="msub">Teclas Atribuídas</p>
+    
+    <div id="mcap"></div>
+    <div id="maddbox">Pressione uma tecla ou gire o Scroll...</div>
+    
+    <p class="mnote">Clique em 'Adicionar' e pressione uma tecla ou botão.</p>
+    <div class="mrow" style="margin-bottom:12px;">
+      <button class="mb mbc" onclick="beginAddKey()">Adicionar</button>
+      <button class="mb mbc" onclick="removeKey()">Remover</button>
+    </div>
+    <div class="mrow">
+      <button class="mb mbs" onclick="saveMap()">Salvar e Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+let mappings = {}; // { TargetButton: ["Key1", "Key2"] }
+let curBtn = null;
+let tempKeys = [];
+let selKeyIdx = -1;
+let aimActive = false;
+let isAdding = false;
+
+const lk={u:0,d:0,l:0,r:0};
+const SRANGE=14;
+const BTNS = {
+  LT:{h:'h-LT',c:'c-LT'}, RT:{h:'h-RT',c:'c-RT'},
+  LB:{h:'h-LB'}, RB:{h:'h-RB'}, LS:{h:'h-LS'}, RS:{h:'h-RS'},
+  DPadUp:{h:'h-DPadUp'}, DPadDown:{h:'h-DPadDown'}, DPadLeft:{h:'h-DPadLeft'}, DPadRight:{h:'h-DPadRight'},
+  Back:{h:'h-Back'}, Start:{h:'h-Start'}, Xbox:{h:'h-Xbox'},
+  Y:{h:'h-Y'}, X:{h:'h-X'}, A:{h:'h-A'}, B:{h:'h-B'}
+};
+
+const $=id=>document.getElementById(id);
+
+function renderKeysList(){
+  const cap = $('mcap');
+  cap.innerHTML = '';
+  if(!tempKeys || tempKeys.length===0){
+     cap.innerHTML = '<div style="color:#666;text-align:center;margin-top:40px;">Nenhuma tecla</div>';
+     return;
+  }
+  tempKeys.forEach((k,i)=>{
+    const el = document.createElement('div');
+    el.className = 'mkey' + (i===selKeyIdx?' sel':'');
+    el.textContent = formatKey(k);
+    el.onclick = ()=> { selKeyIdx = i; renderKeysList(); };
+    cap.appendChild(el);
+  });
+}
+
+function beginAddKey(){
+  isAdding = true;
+  $('maddbox').style.display = 'block';
+  $('mcap').style.display = 'none';
+}
+function stopAdd(){
+  isAdding = false;
+  $('maddbox').style.display = 'none';
+  $('mcap').style.display = 'block';
+}
+function removeKey(){
+  if(selKeyIdx>=0 && selKeyIdx<tempKeys.length){
+    tempKeys.splice(selKeyIdx, 1);
+    selKeyIdx = -1;
+    renderKeysList();
+  }
+}
+
+function formatKey(k){
+  if(!k)return'';
+  return k.toUpperCase()
+          .replace('MOUSE','MOUSE ')
+          .replace('LEFT','L-')
+          .replace('RIGHT','R-')
+          .replace('CONTROL','CTRL')
+          .replace("MOUSE WHEELUP", "SCROLL-UP")
+          .replace("MOUSE WHEELDOWN", "SCROLL-DOWN");
+}
+
+function pressBtn(btn){if(aimActive){ const e=document.getElementById(BTNS[btn]?.h); if(e)e.classList.add('on'); }}
+function releaseBtn(btn){const e=document.getElementById(BTNS[btn]?.h); if(e)e.classList.remove('on');}
+function releaseAll(){Object.keys(BTNS).forEach(b=>{const e=document.getElementById(BTNS[b]?.h); if(e)e.classList.remove('on');});}
+
+function moveLS(){
+  const tx=(lk.r-lk.l)*SRANGE, ty=(lk.d-lk.u)*SRANGE;
+  const e=$('h-LS'); if(e) e.style.transform=`translate(calc(-50% + \${tx}px),calc(-50% + \${ty}px))`;
+}
+function applyWasd(key,dn){
+  const d=dn?1:0, k=key.toLowerCase();
+  if(k==='w')lk.u=d; if(k==='s')lk.d=d; if(k==='a')lk.l=d; if(k==='d')lk.r=d;
+  moveLS();
+}
+
+function findBtns(key){
+  let res=[];
+  for(const[b,arr] of Object.entries(mappings)){
+    if(Array.isArray(arr) && arr.some(k=>k.toLowerCase()===key.toLowerCase())) res.push(b);
+  }
+  return res;
+}
+
+function startMap(btn){
+  if($('mbg').classList.contains('on'))return;
+  curBtn=btn; 
+  tempKeys=[...(mappings[btn]||[])];
+  selKeyIdx=-1; stopAdd();
+  
+  let label = btn.replace('DPad','D-Pad ');
+  $('mtitle').textContent=`Remapear: \${label}`;
+  
+  $('mbg').classList.add('on');
+  renderKeysList();
+  
+  const e=document.getElementById(BTNS[btn]?.h); 
+  if(e)e.classList.add('mapping');
+}
+
+function clearModal(){
+  if(curBtn){
+     const e=document.getElementById(BTNS[curBtn]?.h); 
+     if(e)e.classList.remove('mapping');
+  }
+  $('mbg').classList.remove('on');
+  curBtn=null; stopAdd();
+}
+
+function saveMap(){
+  if(!curBtn){clearModal();return;}
+  mappings[curBtn]=[...tempKeys];
+  toCS({type:'mappingChanged',button:curBtn,keys:mappings[curBtn]});
+  clearModal();
+}
+function cancelMap(){clearModal();}
+
+function toCS(d){try{if(window.chrome?.webview)window.chrome.webview.postMessage(JSON.stringify(d));}catch(_){}}
+function fromCS(raw){
+  let m;try{m=typeof raw==='string'?JSON.parse(raw):raw;}catch(_){return;}
+  switch(m.type){
+    case 'setMappings': mappings=m.mappings||{}; break;
+    case 'aimAssistState': aimActive=!!m.active;if(!aimActive)releaseAll();break;
+    case 'highlight': if(m.on)pressBtn(m.button);else releaseBtn(m.button);break;
+    case 'keydown': {const bs=findBtns(m.key);bs.forEach(b=>pressBtn(b));applyWasd(m.key,true);break;}
+    case 'keyup': {const bs=findBtns(m.key);bs.forEach(b=>releaseBtn(b));applyWasd(m.key,false);break;}
+  }
+}
+if(window.chrome?.webview) window.chrome.webview.addEventListener('message',e=>fromCS(e.data));
+
+document.addEventListener('keydown',e=>{
+  if($('mbg').classList.contains('on')){
+    e.preventDefault();
+    if(e.key==='Escape'){cancelMap();return;}
+    if(isAdding && !['Shift','Control','Alt','Meta'].includes(e.key)){
+        const kStr = (e.key === ' ' ? 'Space' : e.key);
+        if(!tempKeys.includes(kStr)) tempKeys.push(kStr);
+        renderKeysList(); stopAdd();
+    }
+    return;
+  }
+  if(!e.repeat){
+    const bs=findBtns(e.key); bs.forEach(pressBtn); applyWasd(e.key,true);
+    toCS({type:'keydown',key:e.key});
+  }
+});
+
+document.addEventListener('keyup',e=>{
+  if($('mbg').classList.contains('on'))return;
+  const bs=findBtns(e.key); bs.forEach(releaseBtn); applyWasd(e.key,false);
+  toCS({type:'keyup',key:e.key});
+});
+
+document.addEventListener('mousedown',e=>{
+  if(!$('mbg').classList.contains('on'))return;
+  if(!isAdding) return;
+  const n=['MouseLeft','MouseMiddle','MouseRight','XButton1','XButton2'];
+  const k=n[e.button];
+  if(k){
+      if(!tempKeys.includes(k)) tempKeys.push(k);
+      renderKeysList(); stopAdd();
+  }
+  e.preventDefault();
+});
+
+document.addEventListener('wheel',e=>{
+  if(!$('mbg').classList.contains('on'))return;
+  if(!isAdding) return;
+  const k=e.deltaY<0?'MouseWheelUp':'MouseWheelDown';
+  if(!tempKeys.includes(k)) tempKeys.push(k);
+  renderKeysList(); stopAdd();
+  e.preventDefault();
+});
+
+$('mbg').addEventListener('click',e=>{if(e.target===$('mbg'))cancelMap();});
+
+toCS({type:'ready'});
+
+
+// ── Custom Tooltip ────────────────────────────────────────────────────────
+(function(){
+  const tt = document.getElementById('tt');
+  const ttInner = document.getElementById('tt-inner');
+  let hideTimer;
+
+  document.querySelectorAll('.hs[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      clearTimeout(hideTimer);
+      const tip = el.dataset.tip || '';
+      const keys = el.dataset.keys || '';
+      let html = tip;
+      if (keys) html += ' <span class="key-badge">' + keys + '</span>';
+      ttInner.innerHTML = html;
+      tt.style.display = 'block';
+      positionTooltip(e);
+    });
+    el.addEventListener('mousemove', positionTooltip);
+    el.addEventListener('mouseleave', () => {
+      hideTimer = setTimeout(() => { tt.style.display = 'none'; }, 80);
+    });
+  });
+
+  function positionTooltip(e) {
+    const margin = 14;
+    let x = e.clientX + margin;
+    let y = e.clientY - 36;
+    const rect = tt.getBoundingClientRect();
+    if (x + rect.width > window.innerWidth - 8) x = e.clientX - rect.width - margin;
+    if (y < 4) y = e.clientY + margin;
+    tt.style.left = x + 'px';
+    tt.style.top  = y + 'px';
+  }
+})();
+
+function fitBox(){
+  const sc=$('scene'), bx=$('ctrl-box'); if(!sc||!bx)return;
+  const scW=sc.clientWidth-12, scH=sc.clientHeight-12, RATIO=3213/2079;
+  bx.style.width=Math.min(scW, Math.floor(scH*RATIO))+'px';
+}
+const _ro=new ResizeObserver(fitBox); _ro.observe(document.getElementById('scene'));
+fitBox();
+
+</script>
+</body>
+</html>

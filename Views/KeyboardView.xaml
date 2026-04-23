@@ -1,0 +1,235 @@
+<UserControl x:Class="AimAssistPro.Views.KeyboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <Grid Margin="32,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="Remapeamento de Teclas" Style="{StaticResource H1}"/>
+            <TextBlock Text="Clique em uma tecla do teclado e selecione o botão do controle de destino" Style="{StaticResource Body}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Instructions — limpo, sem borda/fundo roxo -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
+            <Path Data="{StaticResource InfoIcon}" Fill="{StaticResource TextMuted}"
+                  Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
+            <TextBlock Foreground="{StaticResource TextSecondary}" FontSize="12" VerticalAlignment="Center">
+                <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}">Como usar: </Run>
+                <Run>1. Selecione um perfil → 2. Clique em uma tecla → 3. Clique no botão do controle → 4. Salve</Run>
+            </TextBlock>
+        </StackPanel>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="260"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Keyboard Layout -->
+            <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,16,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                        <TextBlock Text="Layout do Teclado" Style="{StaticResource H3}"/>
+                        <Border Margin="12,0,0,0" Style="{StaticResource BadgeAccent}">
+                            <TextBlock x:Name="SelectedKeyText" Text="Nenhuma tecla selecionada"
+                                       Foreground="{StaticResource AccentSecondary}" FontSize="11"/>
+                        </Border>
+                    </StackPanel>
+
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="KeyboardPanel" IsEnabled="True">
+
+                        <!-- Row 1: Function Keys -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button x:Name="KeyEsc" Style="{StaticResource KeyBtn}" Content="ESC" Width="48" Tag="Escape"/>
+                            <Rectangle Width="24"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F1" Tag="F1"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F2" Tag="F2"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F3" Tag="F3"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F4" Tag="F4"/>
+                            <Rectangle Width="12"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F5" Tag="F5"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F6" Tag="F6"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F7" Tag="F7"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F8" Tag="F8"/>
+                            <Rectangle Width="12"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F9" Tag="F9"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F10" Tag="F10"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F11" Tag="F11"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F12" Tag="F12"/>
+                        </StackPanel>
+
+                        <!-- Row 2: Numbers -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button Style="{StaticResource KeyBtn}" Content="`" Tag="OemTilde"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="1" Tag="D1"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="2" Tag="D2"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="3" Tag="D3"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="4" Tag="D4"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="5" Tag="D5"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="6" Tag="D6"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="7" Tag="D7"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="8" Tag="D8"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="9" Tag="D9"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="0" Tag="D0"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="-" Tag="OemMinus"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="=" Tag="OemPlus"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="⌫" Width="68" Tag="Back"/>
+                        </StackPanel>
+
+                        <!-- Row 3: QWERTY -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button Style="{StaticResource KeyBtn}" Content="TAB" Width="60" Tag="Tab"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="Q" Tag="Q"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="W" Tag="W"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="E" Tag="E"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="R" Tag="R"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="T" Tag="T"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="Y" Tag="Y"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="U" Tag="U"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="I" Tag="I"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="O" Tag="O"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="P" Tag="P"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="[" Tag="OemOpenBrackets"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="]" Tag="OemCloseBrackets"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="\" Width="60" Tag="OemPipe"/>
+                        </StackPanel>
+
+                        <!-- Row 4: ASDF -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button Style="{StaticResource KeyBtn}" Content="CAPS" Width="72" Tag="CapsLock"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="A" Tag="A"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="S" Tag="S"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="D" Tag="D"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="F" Tag="F"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="G" Tag="G"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="H" Tag="H"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="J" Tag="J"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="K" Tag="K"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="L" Tag="L"/>
+                            <Button Style="{StaticResource KeyBtn}" Content=";" Tag="OemSemicolon"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="'" Tag="OemQuotes"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="ENTER" Width="82" Tag="Return"/>
+                        </StackPanel>
+
+                        <!-- Row 5: ZXCV -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button Style="{StaticResource KeyBtn}" Content="SHIFT" Width="96" Tag="LeftShift"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="Z" Tag="Z"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="X" Tag="X"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="C" Tag="C"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="V" Tag="V"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="B" Tag="B"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="N" Tag="N"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="M" Tag="M"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="," Tag="OemComma"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="." Tag="OemPeriod"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="/" Tag="OemQuestion"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="SHIFT" Width="96" Tag="RightShift"/>
+                        </StackPanel>
+
+                        <!-- Row 6: Bottom -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Button Style="{StaticResource KeyBtn}" Content="CTRL" Width="72" Tag="LeftCtrl"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="WIN" Width="56" Tag="LWin"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="ALT" Width="56" Tag="LeftAlt"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="SPACE" Width="280" Tag="Space"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="ALT" Width="56" Tag="RightAlt"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="WIN" Width="56" Tag="RWin"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="CTRL" Width="72" Tag="RightCtrl"/>
+                        </StackPanel>
+
+                        <!-- Mouse Buttons -->
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <TextBlock Text="MOUSE:" Foreground="{StaticResource TextMuted}"
+                                       FontSize="11" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="LEFT" Tag="MouseLeft"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="RIGHT" Tag="MouseRight"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="MIDDLE" Tag="MouseMiddle"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="M4" Tag="XButton1"/>
+                            <Button Style="{StaticResource KeyBtn}" Content="M5" Tag="XButton2"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
+            </Border>
+
+            <!-- Right Panel: Target Button Selector -->
+            <Border Grid.Column="1" Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Botão de Destino" Style="{StaticResource H3}" Margin="0,0,0,4"/>
+                    <TextBlock Text="Selecione o botão que esta tecla irá acionar" Style="{StaticResource Caption}" Margin="0,0,0,16"/>
+
+                    <!-- Buttons -->
+                    <TextBlock Text="BOTÕES" Style="{StaticResource Caption}" Margin="0,0,0,8"/>
+                    <UniformGrid Columns="2" Margin="0,0,0,12">
+                        <Button Style="{StaticResource ControllerBtn}" Content="A" Tag="A" Foreground="#10B981"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="B" Tag="B" Foreground="#EF4444"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="X" Tag="X" Foreground="#3B82F6"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="Y" Tag="Y" Foreground="#84CC16"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="LB" Tag="LB"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="RB" Tag="RB"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="LT" Tag="LT"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="RT" Tag="RT"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="LS" Tag="LS"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="RS" Tag="RS"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="START" Tag="Start"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="BACK" Tag="Back"/>
+                    </UniformGrid>
+
+                    <!-- D-Pad -->
+                    <TextBlock Text="D-PAD" Style="{StaticResource Caption}" Margin="0,0,0,8"/>
+                    <UniformGrid Columns="2" Margin="0,0,0,12">
+                        <Button Style="{StaticResource ControllerBtn}" Content="↑ UP" Tag="DPadUp"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="↓ DOWN" Tag="DPadDown"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="← LEFT" Tag="DPadLeft"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="→ RIGHT" Tag="DPadRight"/>
+                    </UniformGrid>
+
+                    <!-- Axes -->
+                    <TextBlock Text="ANALOG (MOVIMENTO)" Style="{StaticResource Caption}" Margin="0,0,0,8"/>
+                    <UniformGrid Columns="2" Margin="0,0,0,16">
+                        <Button Style="{StaticResource ControllerBtn}" Content="L.X +" Tag="LeftX+"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="L.X −" Tag="LeftX-"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="L.Y +" Tag="LeftY+"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="L.Y −" Tag="LeftY-"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="R.X +" Tag="RightX+"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="R.X −" Tag="RightX-"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="R.Y +" Tag="RightY+"/>
+                        <Button Style="{StaticResource ControllerBtn}" Content="R.Y −" Tag="RightY-"/>
+                    </UniformGrid>
+
+                    <Separator Margin="0,0,0,12"/>
+
+                    <!-- Salvar: apenas ícone com tooltip -->
+                    <Button x:Name="BtnSave" Style="{StaticResource IconButton}"
+                            Height="40" Width="40"
+                            HorizontalAlignment="Left"
+                            Click="BtnSave_Click"
+                            ToolTip="Salvar mapeamento">
+                        <Path Data="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"
+                              Fill="{StaticResource TextSecondary}" Width="18" Height="18" Stretch="Uniform"/>
+                    </Button>
+                    <Button Style="{StaticResource SecondaryButton}"
+                            Content="Limpar Seleção"
+                            Height="36"
+                            Margin="0,8,0,0"
+                            Click="BtnClear_Click"/>
+
+                    <Separator Margin="0,12"/>
+                    <TextBlock x:Name="PendingMappingText"
+                               Text="Nenhum mapeamento pendente"
+                               Style="{StaticResource Caption}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
