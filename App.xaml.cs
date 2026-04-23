@@ -234,7 +234,15 @@ namespace AimAssistPro
 
                 // ── Auto-update obrigatorio: roda ANTES do MainWindow ────────
                 Log("9. UpdateService");
-                await UpdateService.CheckForUpdatesAsync();
+                var updateResult = await UpdateService.CheckForUpdatesAsync();
+
+                // ShutdownRequired = usuario cancelou update obrigatorio OU download ok (installer ja rodando)
+                if (updateResult == UpdateService.UpdateResult.ShutdownRequired)
+                {
+                    Log("Update: shutdown required, encerrando.");
+                    Shutdown();
+                    return;
+                }
 
                 Log("10. new MainWindow()");
                 var mainWin = new MainWindow();

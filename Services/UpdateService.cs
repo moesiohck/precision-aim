@@ -29,7 +29,9 @@ namespace AimAssistPro.Services
         })
         { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
 
-        public static async Task CheckForUpdatesAsync()
+        public enum UpdateResult { NoUpdate, Proceed, ShutdownRequired }
+
+        public static async Task<UpdateResult> CheckForUpdatesAsync()
         {
             try
             {
@@ -48,7 +50,7 @@ namespace AimAssistPro.Services
 
                 // ── 2. Checa se há versão mais nova ──────────────────────────
                 if (!IsNewerVersion(latestVersion, CurrentVersion))
-                    return;
+                    return UpdateResult.NoUpdate;
 
                 bool forcedByMin = IsNewerVersion(minVersion, CurrentVersion);
                 bool shouldForce = mandatory || forcedByMin;
@@ -63,43 +65,41 @@ namespace AimAssistPro.Services
                     userWantsUpdate = dlg.UserAccepted;
                 });
 
-                // Se o usuário recusou/fechou E a atualização é obrigatória → fecha o app
+                // Usuário recusou / fechou o diálogo
                 if (!userWantsUpdate)
-                {
-                    if (shouldForce)
-                    {
-                        Application.Current.Dispatcher.Invoke(() =>
-                            Application.Current.Shutdown());
-                    }
-                    return;
-                }
+                    return shouldForce ? UpdateResult.ShutdownRequired : UpdateResult.NoUpdate;
 
                 // ── 4. Baixa o Setup.exe e executa ───────────────────────────
                 string setupUrl = downloadUrl.Replace("AimAssistPro.exe", "PrecisionAimAssist_Setup.exe");
-                await DownloadAndRunSetup(setupUrl, shouldForce);
+                bool downloadOk = await DownloadAndRunSetup(setupUrl, shouldForce);
+
+                // Se download teve sucesso, o Process.Start do installer já foi chamado
+                // e o OnStartup vai receber ShutdownRequired para fechar limpo
+                if (downloadOk)  return UpdateResult.ShutdownRequired;
+                if (shouldForce) return UpdateResult.ShutdownRequired;
+                return UpdateResult.NoUpdate;
             }
             catch (Exception ex)
             {
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine($"[UpdateService] {ex}");
 #endif
-                // Silencioso em Release para não bloquear o uso em caso de falha de rede
+                // Silencioso em Release
+                return UpdateResult.NoUpdate;
             }
         }
 
-        private static async Task DownloadAndRunSetup(string setupUrl, bool mandatory)
+        /// <summary>Retorna true se o installer foi iniciado com sucesso.</summary>
+        private static async Task<bool> DownloadAndRunSetup(string setupUrl, bool mandatory)
         {
-            if (string.IsNullOrEmpty(setupUrl))
-            {
-                if (mandatory) Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
-                return;
-            }
+            if (string.IsNullOrEmpty(setupUrl)) return false;
 
             string tempSetup = Path.Combine(Path.GetTempPath(), "PrecisionAimAssist_Setup.exe");
+            bool success = false;
 
             try
             {
-                // Mostra progresso para o usuário não achar que travou
+                // Desabilita janelas durante o download para o usuário não navegar
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     foreach (Window w in Application.Current.Windows)
@@ -118,13 +118,11 @@ namespace AimAssistPro.Services
                 var buffer = new byte[81920];
                 int read;
                 while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                {
                     await file.WriteAsync(buffer, 0, read);
-                }
 
                 file.Close();
 
-                // ── Executa o instalador silenciosamente com UAC ─────────────
+                // ── Lança o instalador silencioso com UAC ────────────────────
                 Process.Start(new ProcessStartInfo
                 {
                     FileName        = tempSetup,
@@ -133,43 +131,27 @@ namespace AimAssistPro.Services
                     Verb            = "runas"
                 });
 
-                // Fecha o app — o instalador substitui e relança
-                Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
+                success = true; // installer iniciado — caller vai fechar o app
             }
             catch (Exception ex)
             {
-                if (File.Exists(tempSetup)) File.Delete(tempSetup);
+                if (File.Exists(tempSetup)) try { File.Delete(tempSetup); } catch { }
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // Reativa as janelas
                     foreach (Window w in Application.Current.Windows)
                         w.IsEnabled = true;
 
-                    if (mandatory)
-                    {
-                        // Atualização obrigatória falhou → informa e fecha
-                        MessageBox.Show(
-                            "Não foi possível baixar a atualização necessária.\n\n" +
-                            "Verifique sua conexão e tente abrir o aplicativo novamente.\n\n" +
-                            $"Erro: {ex.Message}",
-                            "Precision Aim Assist — Atualização Necessária",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                    var msg = mandatory
+                        ? $"Não foi possível baixar a atualização necessária.\n\nVerifique sua conexão e tente abrir o aplicativo novamente.\n\nErro: {ex.Message}"
+                        : $"Falha ao baixar atualização. Verifique sua internet.\n\nErro: {ex.Message}";
 
-                        Application.Current.Shutdown();
-                    }
-                    else
-                    {
-                        // Atualização opcional falhou → apenas avisa
-                        MessageBox.Show(
-                            $"Falha ao baixar atualização.\n\nVerifique sua internet e tente novamente.\n\nErro: {ex.Message}",
-                            "Precision Aim Assist",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-                    }
+                    var icon = mandatory ? MessageBoxImage.Error : MessageBoxImage.Warning;
+                    MessageBox.Show(msg, "Precision Aim Assist", MessageBoxButton.OK, icon);
                 });
             }
+
+            return success;
         }
 
         private static bool IsNewerVersion(string candidate, string current)
