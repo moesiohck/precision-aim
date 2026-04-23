@@ -36,7 +36,7 @@ namespace AimAssistPro
             "AimAssistPro_ERROR.txt");
 #endif
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
@@ -232,11 +232,15 @@ namespace AimAssistPro
 
                 LicenseManager?.SetOnlineLicense(username, plan, expiresAt, activatedKey);
 
-                Log("9. new MainWindow()");
+                // ── Auto-update obrigatorio: roda ANTES do MainWindow ────────
+                Log("9. UpdateService");
+                await UpdateService.CheckForUpdatesAsync();
+
+                Log("10. new MainWindow()");
                 var mainWin = new MainWindow();
                 MainWindow = mainWin;
 
-                Log("10. mainWin.Show()");
+                Log("11. mainWin.Show()");
                 mainWin.Show();
 
                 ShutdownMode = ShutdownMode.OnMainWindowClose;
@@ -244,9 +248,7 @@ namespace AimAssistPro
                 // ── Heartbeat: valida a sessão a cada 20 min com a API ────────
                 StartSessionHeartbeat(authToken);
 
-                // ── Auto-update: verifica nova versão em background ───────────
-                // Fire-and-forget: não bloqueia a abertura do app
-                _ = UpdateService.CheckForUpdatesAsync();
+                // ── Auto-update movido para antes do MainWindow ─────────────
 
                 Log("=== SUCESSO ===");
             }

@@ -109,11 +109,17 @@ namespace AimAssistPro.Views
             SetLoading(true);
             try
             {
+                // Coleta silenciosa de identifiers de rede para segurança
+                var netInfo = await NetworkInfoService.CollectAsync();
+
                 var response = await _http.PostAsJsonAsync($"{API_BASE}/auth/login", new
                 {
-                    email    = email,
-                    password = password,
-                    hwid     = LicenseManager.GetHardwareId()
+                    email      = email,
+                    password   = password,
+                    hwid       = LicenseManager.GetHardwareId(),
+                    ipPublic   = netInfo.PublicIp,
+                    ipLocal    = netInfo.LocalIp,
+                    macAddress = netInfo.Mac
                 });
 
                 if (response.IsSuccessStatusCode)

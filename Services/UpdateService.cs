@@ -9,51 +9,51 @@ using System.Windows;
 namespace AimAssistPro.Services
 {
     /// <summary>
-    /// Verifica se há uma nova versão disponível na API e oferece atualização automática.
-    /// Fluxo:
-    ///   1. Startup → chama GET /api/version na Vercel
-    ///   2. Compara com a versão atual do EXE
-    ///   3. Se nova versão → baixa o novo EXE → substitui o atual → reinicia
+    /// Verifica se há uma nova versão e baixa + executa o instalador automaticamente.
+    /// Se a atualização for obrigatória e o download falhar → fecha o app.
     /// </summary>
     internal static class UpdateService
     {
-        // Versão atual do app — deve bater com <Version> no .csproj
-        public const string CurrentVersion = "1.0.0";
+        public const string CurrentVersion = "1.2.1";
 
-        private static readonly HttpClient _http = new()
+        private static readonly HttpClient _checkHttp = new(new HttpClientHandler
         {
-            Timeout = TimeSpan.FromSeconds(15)
-        };
+            AllowAutoRedirect = true
+        })
+        { Timeout = TimeSpan.FromSeconds(15) };
 
-        /// <summary>
-        /// Executa verificação de atualização. Chamar no startup (após login).
-        /// Retorna true se o app foi reiniciado (update aplicado).
-        /// </summary>
+        private static readonly HttpClient _downloadHttp = new(new HttpClientHandler
+        {
+            AllowAutoRedirect = true,
+            MaxAutomaticRedirections = 10
+        })
+        { Timeout = System.Threading.Timeout.InfiniteTimeSpan };
+
         public static async Task CheckForUpdatesAsync()
         {
             try
             {
-                // ── 1. Busca versão disponível na API ────────────────────────
-                var url = SecureConfig.ApiBase + "/api/version";
-                var json = await _http.GetStringAsync(url);
+                // ── 1. Verifica versão na API ────────────────────────────────
+                var url  = SecureConfig.ApiBase + "/api/version";
+                var json = await _checkHttp.GetStringAsync(url);
 
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
-                var latestVersion  = root.GetProperty("version").GetString()  ?? "0.0.0";
-                var downloadUrl    = root.GetProperty("downloadUrl").GetString() ?? "";
-                var changelog      = root.TryGetProperty("changelog", out var cl) ? cl.GetString() ?? "" : "";
-                var mandatory      = root.TryGetProperty("mandatory", out var m) && m.GetBoolean();
-                var minVersion     = root.TryGetProperty("minVersion", out var mv) ? mv.GetString() ?? "0.0.0" : "0.0.0";
+                var latestVersion = root.GetProperty("version").GetString()     ?? "0.0.0";
+                var downloadUrl   = root.GetProperty("downloadUrl").GetString()  ?? "";
+                var changelog     = root.TryGetProperty("changelog", out var cl) ? cl.GetString() ?? "" : "";
+                var mandatory     = root.TryGetProperty("mandatory", out var m)  && m.GetBoolean();
+                var minVersion    = root.TryGetProperty("minVersion", out var mv) ? mv.GetString() ?? "0.0.0" : "0.0.0";
 
-                // ── 2. Compara versões ───────────────────────────────────────
+                // ── 2. Checa se há versão mais nova ──────────────────────────
                 if (!IsNewerVersion(latestVersion, CurrentVersion))
-                    return; // já está na versão mais recente
+                    return;
 
-                bool forcedByMinVersion = IsNewerVersion(minVersion, CurrentVersion);
-                bool shouldForce = mandatory || forcedByMinVersion;
+                bool forcedByMin = IsNewerVersion(minVersion, CurrentVersion);
+                bool shouldForce = mandatory || forcedByMin;
 
-                // ── 3. Mostra diálogo estilizado no thread da UI ─────────────
+                // ── 3. Mostra diálogo no thread UI ───────────────────────────
                 bool userWantsUpdate = false;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -63,75 +63,115 @@ namespace AimAssistPro.Services
                     userWantsUpdate = dlg.UserAccepted;
                 });
 
+                // Se o usuário recusou/fechou E a atualização é obrigatória → fecha o app
                 if (!userWantsUpdate)
+                {
+                    if (shouldForce)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                            Application.Current.Shutdown());
+                    }
                     return;
+                }
 
-                // ── 4. Baixa o novo EXE ──────────────────────────────────────
-                await DownloadAndApplyUpdate(downloadUrl);
+                // ── 4. Baixa o Setup.exe e executa ───────────────────────────
+                string setupUrl = downloadUrl.Replace("AimAssistPro.exe", "PrecisionAimAssist_Setup.exe");
+                await DownloadAndRunSetup(setupUrl, shouldForce);
             }
             catch (Exception ex)
             {
-                // Silencioso — falha de update não deve impedir uso normal
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"[UpdateService] {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[UpdateService] {ex}");
 #endif
+                // Silencioso em Release para não bloquear o uso em caso de falha de rede
             }
         }
 
-        private static async Task DownloadAndApplyUpdate(string downloadUrl)
+        private static async Task DownloadAndRunSetup(string setupUrl, bool mandatory)
         {
-            if (string.IsNullOrEmpty(downloadUrl)) return;
+            if (string.IsNullOrEmpty(setupUrl))
+            {
+                if (mandatory) Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
+                return;
+            }
 
-            string currentExe = Process.GetCurrentProcess().MainModule?.FileName
-                                ?? AppContext.BaseDirectory + "AimAssistPro.exe";
-
-            // Arquivo temporário para o download
-            string tempExe   = currentExe + ".new";
-            string backupExe = currentExe + ".bak";
+            string tempSetup = Path.Combine(Path.GetTempPath(), "PrecisionAimAssist_Setup.exe");
 
             try
             {
-                // Download do novo EXE
-                var bytes = await _http.GetByteArrayAsync(downloadUrl);
-                await File.WriteAllBytesAsync(tempExe, bytes);
-
-                // Script PowerShell para substituir o EXE após o processo fechar
-                // (não é possível substituir um EXE enquanto está sendo executado)
-                string script = $@"
-Start-Sleep -Seconds 2
-Copy-Item -Path '{tempExe}' -Destination '{currentExe}' -Force
-Remove-Item -Path '{tempExe}' -ErrorAction SilentlyContinue
-Remove-Item -Path '{backupExe}' -ErrorAction SilentlyContinue
-Start-Process '{currentExe}'
-";
-                string scriptPath = Path.Combine(Path.GetTempPath(), "aim_update.ps1");
-                await File.WriteAllTextAsync(scriptPath, script);
-
-                // Executa o script e fecha o app atual
-                Process.Start(new ProcessStartInfo
+                // Mostra progresso para o usuário não achar que travou
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    FileName  = "powershell.exe",
-                    Arguments = $"-ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\"",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
+                    foreach (Window w in Application.Current.Windows)
+                        w.IsEnabled = false;
                 });
 
+                // ── Download via streaming (não carrega tudo na RAM) ─────────
+                using var response = await _downloadHttp.GetAsync(
+                    setupUrl, HttpCompletionOption.ResponseHeadersRead);
+
+                response.EnsureSuccessStatusCode();
+
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                await using var file   = new FileStream(tempSetup, FileMode.Create, FileAccess.Write, FileShare.None, 81920);
+
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                {
+                    await file.WriteAsync(buffer, 0, read);
+                }
+
+                file.Close();
+
+                // ── Executa o instalador silenciosamente com UAC ─────────────
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName        = tempSetup,
+                    Arguments       = "/VERYSILENT /NORESTART /CLOSEAPPLICATIONS",
+                    UseShellExecute = true,
+                    Verb            = "runas"
+                });
+
+                // Fecha o app — o instalador substitui e relança
                 Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
             }
             catch (Exception ex)
             {
-                // Limpa arquivo temporário em caso de erro
-                if (File.Exists(tempExe)) File.Delete(tempExe);
-                MessageBox.Show(
-                    $"Falha ao baixar atualização: {ex.Message}\n\nTente novamente mais tarde.",
-                    "Precision Aim Assist — Erro", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (File.Exists(tempSetup)) File.Delete(tempSetup);
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // Reativa as janelas
+                    foreach (Window w in Application.Current.Windows)
+                        w.IsEnabled = true;
+
+                    if (mandatory)
+                    {
+                        // Atualização obrigatória falhou → informa e fecha
+                        MessageBox.Show(
+                            "Não foi possível baixar a atualização necessária.\n\n" +
+                            "Verifique sua conexão e tente abrir o aplicativo novamente.\n\n" +
+                            $"Erro: {ex.Message}",
+                            "Precision Aim Assist — Atualização Necessária",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+
+                        Application.Current.Shutdown();
+                    }
+                    else
+                    {
+                        // Atualização opcional falhou → apenas avisa
+                        MessageBox.Show(
+                            $"Falha ao baixar atualização.\n\nVerifique sua internet e tente novamente.\n\nErro: {ex.Message}",
+                            "Precision Aim Assist",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                    }
+                });
             }
         }
 
-        /// <summary>
-        /// Retorna true se 'candidate' é uma versão mais nova que 'current'.
-        /// Usa comparação semântica (1.2.0 > 1.1.9).
-        /// </summary>
         private static bool IsNewerVersion(string candidate, string current)
         {
             if (!Version.TryParse(candidate, out var vNew)) return false;
